@@ -1,3 +1,5 @@
+mod actions;
+
 use gtk::prelude::*;
 use gtk::*;
 
@@ -56,18 +58,13 @@ fn build_ui(app: &Application) {
     // Actions
     button_forward.connect_clicked(glib::clone!(
         @weak list_box => move |_| {
-            for number in 0..=100 {
-                let label = Label::new(Some(&number.to_string()));
-                list_box.append(&label);
-            }
+            actions::forward_action(&list_box);
         }
     ));
 
     button_backward.connect_clicked(glib::clone!(
         @weak list_box => move |_| {
-            while let Some(row) = list_box.row_at_index(0) {
-                list_box.remove(&row);
-            }
+            actions::backward_action(&list_box);
         }
     ));
 
