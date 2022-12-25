@@ -43,9 +43,12 @@ fn build_ui(app: &Application) {
     let button_backward = Button::builder().label("Backward").build();
     let button_confirm = Button::builder().label("Confirm").build();
 
+    let delete_option = CheckButton::builder().label("Delete").build();
+
     button_grid.attach(&button_forward, 0, 0, 1, 1);
     button_grid.attach(&button_backward, 1, 0, 1, 1);
     button_grid.attach(&button_confirm, 2, 0, 1, 1);
+    button_grid.attach(&delete_option, 3, 0, 1, 1);
 
     // ListBox
     let list_box = ListBox::new();
@@ -57,20 +60,26 @@ fn build_ui(app: &Application) {
 
     // Actions
     button_forward.connect_clicked(glib::clone!(
-        @weak list_box => move |_| {
-            actions::forward_action(&list_box);
+        @weak list_box,
+        @weak delete_option => move |_| {
+            let delete = delete_option.is_active();
+            actions::forward_action(&list_box, delete);
         }
     ));
 
     button_backward.connect_clicked(glib::clone!(
-        @weak list_box => move |_| {
-            actions::backward_action(&list_box);
+        @weak list_box,
+        @weak delete_option => move |_| {
+            let delete = delete_option.is_active();
+            actions::backward_action(&list_box, delete);
         }
     ));
 
     button_confirm.connect_clicked(glib::clone!(
-        @weak list_box => move |_| {
-            actions::confirm_action(&list_box);
+        @weak list_box,
+        @weak delete_option => move |_| {
+            let delete = delete_option.is_active();
+            actions::confirm_action(&list_box, delete);
         }
     ));
 

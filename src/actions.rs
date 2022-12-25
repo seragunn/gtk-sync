@@ -13,13 +13,13 @@ fn clear_list_box(list_box: &ListBox) {
     }
 }
 
-fn call_rsync(local: &str, remote: &str, list_box: &ListBox) {
-    let rsync_output = Command::new("rsync")
-        .arg("-nvr")
-        .arg("--ignore-existing")
-        .arg(local)
-        .arg(remote)
-        .output();
+fn rsync_dryrun(local: &str, remote: &str, list_box: &ListBox, delete: bool) {
+    let mut args = vec!["-nvr", "--ignore-existing", local, remote];
+    if delete {
+        args.push("--delete");
+    }
+
+    let rsync_output = Command::new("rsync").args(args).output();
     match rsync_output {
         Err(_) => {
             let label = Label::new(Some("Error running rsync"));
@@ -42,19 +42,19 @@ fn call_rsync(local: &str, remote: &str, list_box: &ListBox) {
     }
 }
 
-pub fn forward_action(list_box: &ListBox) {
+pub fn forward_action(list_box: &ListBox, delete: bool) {
     DIRECTION.store(false, Ordering::Relaxed);
     clear_list_box(list_box);
-    call_rsync(LOCAL, REMOTE, list_box)
+    rsync_dryrun(LOCAL, REMOTE, list_box, delete)
 }
 
-pub fn backward_action(list_box: &ListBox) {
+pub fn backward_action(list_box: &ListBox, delete: bool) {
     DIRECTION.store(true, Ordering::Relaxed);
     clear_list_box(list_box);
-    call_rsync(REMOTE, LOCAL, list_box)
+    rsync_dryrun(REMOTE, LOCAL, list_box, delete)
 }
 
-pub fn confirm_action(list_box: &ListBox) {
+pub fn confirm_action(list_box: &ListBox, delete: bool) {
     let local: &str;
     let remote: &str;
 
@@ -66,11 +66,12 @@ pub fn confirm_action(list_box: &ListBox) {
         remote = LOCAL;
     }
 
-    let rsync_result = Command::new("rsync")
-        .arg("-r")
-        .arg(local)
-        .arg(remote)
-        .output();
+    let mut args = vec!["-r", local, remote];
+    if delete {
+        args.push("--delete");
+    }
+
+    let rsync_result = Command::new("rsync").args(args).spawn();
     if let Err(_) = rsync_result {
         eprintln!("Unsuccessful call to rsync");
     } else {
