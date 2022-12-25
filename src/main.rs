@@ -68,5 +68,11 @@ fn build_ui(app: &Application) {
         }
     ));
 
+    button_confirm.connect_clicked(glib::clone!(
+        @weak list_box => move |_| {
+            actions::confirm_action(&list_box);
+        }
+    ));
+
     window.present();
 }
