@@ -50,7 +50,7 @@ fn build_ui(app: &Application) {
     button_grid.attach(&button_confirm, 2, 0, 1, 1);
     button_grid.attach(&delete_option, 3, 0, 1, 1);
 
-    // ListBox
+    // ListBox for rsync output
     let list_box = ListBox::new();
     let list_scroll = ScrolledWindow::builder()
         .propagate_natural_height(true)

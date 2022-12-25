@@ -20,25 +20,27 @@ fn rsync_dryrun(local: &str, remote: &str, list_box: &ListBox, delete: bool) {
     }
 
     let rsync_output = Command::new("rsync").args(args).output();
-    match rsync_output {
-        Err(_) => {
-            let label = Label::new(Some("Error running rsync"));
-            list_box.append(&label);
-        }
-        Ok(output) => {
-            let stdout = String::from_utf8_lossy(&output.stdout);
-            for line in stdout.lines() {
-                if line.starts_with("sending") {
-                    continue;
-                }
-                if line.is_empty() {
-                    break;
-                }
+    // handle possible error
+    if rsync_output.is_err() {
+        let label = Label::new(Some("Error running rsync"));
+        list_box.append(&label);
+        return;
+    }
+    // rsync_output is Ok
+    let output = unsafe { rsync_output.unwrap_unchecked() };
 
-                let label = Label::new(Some(line));
-                list_box.append(&label);
-            }
+    // write list of files to list_box
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    for line in stdout.lines() {
+        if line.starts_with("sending") {
+            continue;
         }
+        if line.is_empty() {
+            break;
+        }
+
+        let label = Label::new(Some(line));
+        list_box.append(&label);
     }
 }
 
@@ -58,6 +60,7 @@ pub fn confirm_action(list_box: &ListBox, delete: bool) {
     let local: &str;
     let remote: &str;
 
+    // recall last pressed button to decide which way to send files
     if !DIRECTION.load(Ordering::Relaxed) {
         local = LOCAL;
         remote = REMOTE;
@@ -72,7 +75,7 @@ pub fn confirm_action(list_box: &ListBox, delete: bool) {
     }
 
     let rsync_result = Command::new("rsync").args(args).spawn();
-    if let Err(_) = rsync_result {
+    if rsync_result.is_err() {
         eprintln!("Unsuccessful call to rsync");
     } else {
         let label = Label::new(Some("Success!"));
