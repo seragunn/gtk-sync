@@ -29,6 +29,13 @@ fn rsync_dryrun(local: &str, remote: &str, list_box: &ListBox, delete: bool) {
     // rsync_output is Ok
     let output = unsafe { rsync_output.unwrap_unchecked() };
 
+    // check for error messages
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    for line in stderr.lines() {
+        let label = Label::new(Some(line));
+        list_box.append(&label);
+    }
+
     // write list of files to list_box
     let stdout = String::from_utf8_lossy(&output.stdout);
     for line in stdout.lines() {
