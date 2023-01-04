@@ -39,7 +39,7 @@ fn rsync_dryrun(local: &str, remote: &str, list_box: &ListBox, delete: bool) {
     // write list of files to list_box
     let stdout = String::from_utf8_lossy(&output.stdout);
     for line in stdout.lines() {
-        if line.starts_with("sending") {
+        if line.starts_with("sending") || line.starts_with("receiving") {
             continue;
         }
         if line.is_empty() {
