@@ -20,14 +20,14 @@ fn rsync_dryrun(local: &str, remote: &str, list_box: &ListBox, delete: bool) {
     }
 
     let rsync_output = Command::new("rsync").args(args).output();
-    // handle possible error
-    if rsync_output.is_err() {
-        let label = Label::new(Some("Error running rsync"));
-        list_box.append(&label);
-        return;
-    }
-    // rsync_output is Ok
-    let output = unsafe { rsync_output.unwrap_unchecked() };
+    let output = match rsync_output {
+        Err(_) => {
+            let label = Label::new(Some("Error running rsync"));
+            list_box.append(&label);
+            return;
+        }
+        Ok(output) => output,
+    };
 
     // check for error messages
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -81,11 +81,20 @@ pub fn confirm_action(list_box: &ListBox, delete: bool) {
         args.push("--delete");
     }
 
-    let rsync_result = Command::new("rsync").args(args).spawn();
-    if rsync_result.is_err() {
-        eprintln!("Unsuccessful call to rsync");
+    let rsync_result = Command::new("rsync").args(args).status();
+
+    let status = match rsync_result {
+        Err(_) => {
+            eprintln!();
+            return;
+        }
+        Ok(status) => status,
+    };
+
+    let label = Label::new(Some(if status.success() {
+        "Success!"
     } else {
-        let label = Label::new(Some("Success!"));
-        list_box.append(&label);
-    }
+        "Exited with error"
+    }));
+    list_box.append(&label);
 }
