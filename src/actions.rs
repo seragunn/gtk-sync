@@ -76,7 +76,7 @@ pub fn confirm_action(list_box: &ListBox, delete: bool) {
         remote = LOCAL;
     }
 
-    let mut args = vec!["-r", local, remote];
+    let mut args = vec!["-r", "--ignore-existing", local, remote];
     if delete {
         args.push("--delete");
     }
