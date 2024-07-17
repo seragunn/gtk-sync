@@ -29,24 +29,33 @@ fn build_ui(app: &Application) {
 
     // Actions
     button_forward.connect_clicked(glib::clone!(
-        @weak list_box,
-        @weak delete_option => move |_| {
+        #[weak]
+        list_box,
+        #[weak]
+        delete_option,
+        move |_| {
             let delete = delete_option.is_active();
             actions::forward_action(&list_box, delete);
         }
     ));
 
     button_backward.connect_clicked(glib::clone!(
-        @weak list_box,
-        @weak delete_option => move |_| {
+        #[weak]
+        list_box,
+        #[weak]
+        delete_option,
+        move |_| {
             let delete = delete_option.is_active();
             actions::backward_action(&list_box, delete);
         }
     ));
 
     button_confirm.connect_clicked(glib::clone!(
-        @weak list_box,
-        @weak delete_option => move |_| {
+        #[weak]
+        list_box,
+        #[weak]
+        delete_option,
+        move |_| {
             let delete = delete_option.is_active();
             actions::confirm_action(&list_box, delete);
         }
